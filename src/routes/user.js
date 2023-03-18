@@ -40,8 +40,13 @@ router.post('/api/signup', async (req, res, next) => {
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			if (error.code === 'P2002') {
-				console.log(error)
-				res.render('signup_post', {
+				/**
+				 * Sending 409 here, since it's a duplication error
+				 * but we can also use 400 Bad Request, may be use
+				 * 409 for double submits?
+				 * https://stackoverflow.com/questions/3290182/which-status-code-should-i-use-for-failed-validations-or-invalid-duplicates
+				 */
+				res.status(409).render('signup_post', {
 					bugType: "csrf-bug",
 					error: "Username already exists"
 				})
