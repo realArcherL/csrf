@@ -1,4 +1,17 @@
-POST http://localhost:3000/api/signup
+POST http://localhost:3000/signup
+Content-Type: application/json
+
+{
+	"username": "test",
+	"password": "test"
+
+}
+
+### GET /login 
+GET http://localhost:3000/login
+
+### POST /login
+POST http://localhost:3000/login
 Content-Type: application/json
 
 {

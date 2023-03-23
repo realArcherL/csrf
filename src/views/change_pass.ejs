@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login</title>
+	<title>Change Pass</title>
 	<style>
 		body {
 			font-family: Arial, sans-serif;
@@ -36,8 +36,8 @@
 			margin-bottom: 0.5rem;
 		}
 
-		input[type="username"],
-		input[type="password"] {
+		input[type="password"],
+		input[type="confirm-password"] {
 			display: block;
 			width: 100%;
 			padding: 0.375rem 0.75rem;
@@ -51,8 +51,8 @@
 			transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 		}
 
-		input[type="username"]:focus,
-		input[type="password"]:focus {
+		input[type="password"]:focus,
+		input[type="confirm-password"]:focus {
 			outline: none;
 			border-color: #80bdff;
 			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
@@ -89,18 +89,18 @@
 					<%= error %>
 				</div>
 				<% } %>
-					<h2 class="text-center">login (Bug type: <%= bugType %>)
+					<h2 class="text-center">changepass (Bug type: <%= bugType %>)
 					</h2>
-					<form action="/login" method="POST">
-						<div class="form-group">
-							<label for="username">username:</label>
-							<input type="username" id="username" name="username" required>
-						</div>
+					<form action="/changepass" method="POST">
 						<div class="form-group">
 							<label for="password">Password:</label>
 							<input type="password" id="password" name="password" required>
 						</div>
-						<button type="submit">Login</button>
+						<div class="form-group">
+							<label for="confirm_password">Confirm Password:</label>
+							<input type="password" id="confirm_password" name="confirm_password" required>
+						</div>
+						<button type="submit">Change Pass</button>
 					</form>
 		</div>
 	</div>
