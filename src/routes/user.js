@@ -65,7 +65,7 @@ router.get('/login', async (req, res, next) => {
 			});
 			return;
 		}
-		res.status(200).redirect('/home')
+		res.redirect('/home')
 	} catch (error) {
 		next(error)
 	}
