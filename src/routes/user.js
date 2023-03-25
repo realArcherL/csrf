@@ -3,39 +3,149 @@ const { PrismaClient, Prisma } = require('@prisma/client');
 
 const prisma = new PrismaClient()
 
-// Front End Render
-router.get('/signup', async (req, res, next) => {
+router.get('/', async (req, res, next) => {
 	try {
-		res.render('signup_post', {
-			bugType: "csrf-bug"
-		})
+		res.send(`
+		<html>
+			<body>
+				<h1>Welcome</h1>
+				<p>Login here: <a href="/login">/login</a>
+				<p>Sing-up here: <a href="/signup">/signup</a>
+			</body>
+		</html>
+		`)
 	} catch (error) {
-
+		next(error)
 	}
 })
 
-// Back-end Render
-router.post('/api/signup', async (req, res, next) => {
+router.get('/home', async (req, res, next) => {
+	try {
+		const username_cookie = req.cookies.username || "";
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		if (user) {
+			res.status(200).render('message', {
+				username: user.username,
+				message: "Message"
+			});
+		} else {
+			res.redirect('/login')
+		}
+	} catch (error) {
+		next(error)
+	}
+})
+
+// GET /login
+router.get('/login', async (req, res, next) => {
+	/**
+	 * This more correct logic than the rest
+	 */
+	try {
+		const username = req.cookies.username;
+		if (!username) {
+			res.render('login_post', {
+				bugType: "csrf-bug"
+			});
+			return;
+		}
+		const user = await prisma.user.findUnique({
+			where: {
+				username
+			}
+		});
+		if (!user) {
+			res.render('login_post', {
+				bugType: "csrf-bug"
+			});
+			return;
+		}
+		res.redirect('/home')
+	} catch (error) {
+		next(error)
+	}
+});
+
+
+// POST login
+router.post('/login', async (req, res, next) => {
 	try {
 		const { username, password } = req.body
-		const signup_message = "Sing-up Success!"
 
-		// Check to see unique user
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username
+			}
+		})
 
-		// Check for passwords to match
+		if (!user) {
+			res.status(404).render('login_post', {
+				bugType: 'csrf-bug',
+				error: 'Username not found!'
+			})
+		}
 
-		const user = await prisma.user.create({
+		//TODO: bcrypt password 
+
+		const checkPassword = password === user.password;
+		if (!checkPassword) {
+			res.status(401).render('login_post', {
+				bugType: 'csrf-bug',
+				error: 'Invalid credentials'
+			});
+		}
+
+		res.cookie("username", username);
+		res.status(200).redirect('/home')
+	} catch (error) {
+		next(error);
+	}
+})
+
+// GET /signup
+router.get('/signup', async (req, res, next) => {
+	try {
+		const username_cookie = req.cookies.username || "";
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		if (user) {
+			res.status(302).redirect('/home')
+		} else {
+			res.render('signup_post', {
+				bugType: "csrf-bug"
+			})
+		}
+
+	} catch (error) {
+		next(error)
+	}
+})
+
+// POST /sign-up
+router.post('/signup', async (req, res, next) => {
+	try {
+		const { username, password } = req.body
+		// TODO: Check to see unique user
+
+		// TODO: Check for passwords to match
+
+		await prisma.user.create({
 			data: {
 				username: username,
 				password: password
 			}
 		});
 
-
-		res.status(200).render("message", {
-			username: username,
-			message: signup_message
-		})
+		res.status(200).redirect('/home')
 
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -57,6 +167,80 @@ router.post('/api/signup', async (req, res, next) => {
 	}
 });
 
+// GET /changepass
+router.get('/changepass', async (req, res, next) => {
+	try {
+		// check for valid users
+
+		const username_cookie = req.cookies.username || "";
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		if (user) {
+			res.status(200).render('change_pass', {
+				bugType: "csrf-bug"
+			})
+		} else {
+			res.status(401).redirect("/login")
+		}
+	} catch (error) {
+		next(error)
+	}
+})
+
+// POST /changepass
+router.post('/changepass', async (req, res, next) => {
+	try {
+		const username_cookie = req.cookies.username;
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		const { password, confirm_password } = req.body
+
+		if (user) {
+			if (password != confirm_password) {
+				// Bad request for password change
+				res.status(400).render('change_pass', {
+					bugType: "csrf-bug",
+					error: "Passwords don't match"
+				})
+			}
+
+			// logic to change password
+			await prisma.user.update({
+				where: {
+					username: user.username
+				},
+				data: {
+					password: password
+				}
+			})
+
+			res.status(200).redirect('/home')
+		} else {
+			res.status(401).redirect("/login")
+		}
+	} catch (error) {
+		next(error)
+	}
+})
+
+
+// logout from the application
+router.get("/logout", async (_, res, next) => {
+	try {
+		res.clearCookie("username");
+		res.redirect("/login");
+	} catch (error) {
+		next(error);
+	}
+});
 
 
 module.exports = router;
