@@ -1,61 +1,64 @@
 # CSRF
+
 Cross Site Request Forgery.
 
 (Notes are heavily inspired from that on PortSwigger, Bug bounty reports, HackerOne and Internet)
 
 ## How does it work?
+
 There are three conditions which should be in place for CSRF to work:
+
 1. Relevant action
 2. Cookie based session handling (nothing other than cookies validating the user requests)
-	- assuming the SameSite Cookies defense are **NOT** in place (SameSite is a browser mechanism that determines when a website's cookies are
-	included in a request). Chrome by default enforces so.
+   - assuming the SameSite Cookies defense are **NOT** in place (SameSite is a browser mechanism that determines when a website's cookies are
+     included in a request). Chrome by default enforces so.
 3. No unpredictable params
 
 ```html
 <html>
-    <body>
-		<!-- sending the request to vulnerable website -->
-        <form action="https://vulnerable-website.com/email/change" method="POST">
-            <input type="hidden" name="email" value="pwned@evil-user.net" />
-        </form>
-        <script>
-            document.forms[0].submit();
-        </script>
-    </body>
+  <body>
+    <!-- sending the request to vulnerable website -->
+    <form action="https://vulnerable-website.com/email/change" method="POST">
+      <input type="hidden" name="email" value="pwned@evil-user.net" />
+    </form>
+    <script>
+      document.forms[0].submit();
+    </script>
+  </body>
 </html>
 ```
 
-## Simple CSRF issue in this website
+## What are some of the defenses against CSRF
 
-We are going to do a CSRF attack to change the password of the user.
+CSRF defenses are applied both on the browser level and on the client side. Some of the most commond defenses are
 
-### Exploit
+1. CSRF tokens (secrets shared by the server on the client side to make sure the requests came from the user)
 
-```javascript
-<body>
-	<!-- sending the request to vulnerable website to change the password -->
-	<h1>Hacked!</h1>
-	<form action="http://localhost:3000/changepass" method="POST">
-		<input type="hidden" password="password" value="hacked" />
-	</form>
-	<script>
-		document.forms[0].submit();
-	</script>
-</body>
-```
+   - are they tied to the session token?
 
-Hosting the web page using a simple Python server: `python3 -m http.server 1337` the response would be:
+2. SameSite Cookies (whehter or not should a browser send, Chrome used SameSite Cookie `Lax` by default)
 
-```http
-HTTP/1.1 302 Found
-X-Powered-By: Express
-```
+3. Referer-based Validation: This is where the referer of the request is checked, but is less secure.
 
-Check the CSRF PR for more. #1
-`CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H` (8.0) in this case, which is debateable.
+### What is a CSRF token?
+
+These are unpredictable tokens added to each sensitive request or action performed by the user.
+
+#### Issues which arise because of flawed Validation
+
+1. Flaw1: the CSRF token validation is based on the GET/POST method
+2.
+
+## Security issues in this project
+
+1. Issue1: Simple CSRF issue (check issue:1 and PR:1) to read more about it.
 
 ## Dev Notes
+
 ### Mar 18th
+
 - Sign-up functionality was completed read why 409 was used here: [#42](https://github.com/realArcherL/csrf/blob/main/src/routes/user.js#L44)
 
-### Marc 22nd
+### Mar 22nd
+
+- Haven't corrected the logic for the cookie check and user check (bad checks on `req.cookies.username` on api end-points)

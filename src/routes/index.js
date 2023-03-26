@@ -1,9 +1,9 @@
 const router = require('express').Router();
 
 // Import the route modules
-const login = require("./user");
+const simple_csrf = require('./simple_csrf_user');
 
-router.use('/', login)
+router.use('/', simple_csrf)
 
 /** 
  *  Export the API server and the route modules

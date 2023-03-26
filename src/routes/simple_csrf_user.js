@@ -232,6 +232,73 @@ router.post('/changepass', async (req, res, next) => {
 })
 
 
+// GET route to get a form for method="GET" to change pass
+router.get('/get/changepass', async (req, res, next) => {
+	try {
+		// check for valid users
+
+		const username_cookie = req.cookies.username || "";
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		if (user) {
+			res.status(200).render('change_pass_get', {
+				bugType: "csrf-bug"
+			})
+		} else {
+			res.redirect("/login")
+		}
+	} catch (error) {
+		next(error)
+	}
+})
+
+// GET request to change the pass
+router.get('/get/getchangepass', async (req, res, next) => {
+	try {
+		const username_cookie = req.cookies.username || "";
+		const user = await prisma.user.findUnique({
+			where: {
+				username: username_cookie
+			}
+		});
+
+		// only change in GET form is now the values are taken
+		// from the URL query instead of body
+		const { password, confirm_password } = req.query
+
+		if (user) {
+			if (password != confirm_password) {
+				// Bad request for password change
+				res.status(400).render('change_pass', {
+					bugType: "csrf-bug",
+					error: "Passwords don't match"
+				})
+			}
+
+			// logic to change password
+			await prisma.user.update({
+				where: {
+					username: user.username
+				},
+				data: {
+					password: password
+				}
+			})
+
+			res.status(200).redirect('/home')
+		} else {
+			res.status(401).redirect("/login")
+		}
+	} catch (error) {
+		next(error)
+	}
+})
+
+
 // logout from the application
 router.get("/logout", async (_, res, next) => {
 	try {
