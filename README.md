@@ -47,11 +47,11 @@ These are unpredictable tokens added to each sensitive request or action perform
 #### Issues which arise because of flawed Validation
 
 1. Flaw1: the CSRF token validation is based on the GET/POST method
-2.
 
 ## Security issues in this project
 
-1. Issue1: Simple CSRF issue (check issue:1 and PR:1) to read more about it.
+- Issue1: Simple CSRF issue (check issue:1 and PR:1) to read more about it.
+  - the `SameSite="Lax" only works for POST forms, if a website is vulnerable to CSRF through GET, it will still work (checked issue2)
 
 ## Dev Notes
 
@@ -62,3 +62,7 @@ These are unpredictable tokens added to each sensitive request or action perform
 ### Mar 22nd
 
 - Haven't corrected the logic for the cookie check and user check (bad checks on `req.cookies.username` on api end-points)
+
+### Mar 25th
+
+- Use a better linter, and stick to a coding style

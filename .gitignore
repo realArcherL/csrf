@@ -91,5 +91,5 @@ lerna-debug.log
 Thumbs.db
 
 # prisma file
-prisma/migrations
+prisma/
 !schema.prisma
