@@ -1,17 +1,15 @@
 # CSRF
 
-Cross Site Request Forgery.
-
-(Notes are heavily inspired from that on PortSwigger, Bug bounty reports, HackerOne and Internet)
+Cross-Site Request Forgery.
+Notes are heavily inspired by that on PortSwigger, Bug bounty reports, HackerOne, and Internet.
 
 ## How does it work?
 
 There are three conditions which should be in place for CSRF to work:
 
 1. Relevant action
-2. Cookie based session handling (nothing other than cookies validating the user requests)
-   - assuming the SameSite Cookies defense are **NOT** in place (SameSite is a browser mechanism that determines when a website's cookies are
-     included in a request). Chrome by default enforces so.
+2. Cookie-based session handling (nothing other than cookies validating the user requests)
+   - assuming the SameSite Cookies defense are **NOT** in place (SameSite is a browser mechanism that determines when a website's cookies are included in a request). Chrome, by default, enforces so.
 3. No unpredictable params
 
 ```html
@@ -32,13 +30,13 @@ There are three conditions which should be in place for CSRF to work:
 
 CSRF defenses are applied both on the browser level and on the client side. Some of the most common defenses are
 
-1. CSRF tokens (secrets shared by the server on the client side to make sure the requests came from the user)
+1. CSRF tokens (secrets shared by the server on the client side to make sure the requests come from the user)
 
    - are they tied to the session token?
 
 2. SameSite Cookies (whether or not should a browser send, Chrome used SameSite Cookie `Lax` by default)
 
-3. Referer-based Validation: This is where the referer of the request is checked, but is less secure.
+3. Referer-based Validation: This is where the referer of the request is checked but is less secure.
 
 ### What is a CSRF token?
 
@@ -59,23 +57,28 @@ These are unpredictable tokens added to each sensitive request or action perform
 2. Vulnerable sister/domains
 3. Token refresh, as seen in the case of SSO
 
-### Referer Header
+#### Referer Header
 
 1. Depends on whether or not the header exists
 2. Naive check on the header value
 
 ## Security issues in this project
 
-- Issue1: Simple CSRF issue (check issue:1 and PR:1) to read more about it.
-  - the `SameSite="Lax" only works for POST forms, if a website is vulnerable to CSRF through GET, it will still work (checked issue2)
+- Issue1: Simple CSRF issue (check issue:1) to read more about it.
+  - the `SameSite="Lax" only works for POST forms, if a website is vulnerable to CSRF through GET, it will still work (check issue2)
 
 ## Fixing the security issues
 
-Either we can use [csrf](https://www.npmjs.com/package/csrf?activeTab=versions) or use [csrf-csrf](https://www.npmjs.com/package/csrf-csrf) or use (helmet)[https://www.npmjs.com/package/helmet]
+Either we can use [csrf](https://www.npmjs.com/package/csrf?activeTab=versions) or use [csrf-csrf](https://www.npmjs.com/package/csrf-csrf) or use [helmet](https://www.npmjs.com/package/helmet)
 
 ### Using the [csrf](https://www.npmjs.com/package/csrf?activeTab=versions) package
 
-Considerations: Package was published 4 years ago, OSS Scorecard score: 3.7, [![Socket Badge](https://socket.dev/api/badge/npm/package/csrf)](https://socket.dev/npm/package/csrf) [Snyk Package Advisor](https://snyk.io/advisor/npm-package/csrf) 68/100 (couldn't find badge support for Snyk)
+#### Considerations:
+
+- Package was published 4 years ago,
+- [OSS Scorecard score: 3.7](https://github.com/ossf/scorecard),
+- [![Socket Badge](https://socket.dev/api/badge/npm/package/csrf)](https://socket.dev/npm/package/csrf)
+- [Snyk Package Advisor](https://snyk.io/advisor/npm-package/csrf) 68/100 (couldn't find badge support for Snyk)
 
 ## Dev Notes
 
@@ -93,4 +96,4 @@ Considerations: Package was published 4 years ago, OSS Scorecard score: 3.7, [![
 
 ### April 3 (Secure Code Reviews before a PR)
 
-- added a GitHub action to prevent code to merged into main before a secure code review (this should be case dependent and the developer must decide which PR's require a security review)
+- GitHub action to post a comment on a new PR
