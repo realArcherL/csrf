@@ -194,7 +194,7 @@ router.get('/changepass', async (req, res, next) => {
 // POST /changepass
 router.post('/changepass', async (req, res, next) => {
 	try {
-		const username_cookie = req.cookies.username;
+		const username_cookie = req.cookies.username || "";
 		const user = await prisma.user.findUnique({
 			where: {
 				username: username_cookie
