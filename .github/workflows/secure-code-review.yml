@@ -1,37 +1,15 @@
-name: Secure Code Review
+name: Post welcome comment
 on:
   pull_request:
-    branches:
-      - main
+    types: [opened]
+permissions:
+  pull-requests: write
 jobs:
-  secure-code-review:
+  build:
+    name: Post welcome comment
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Secure Code Review
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const body = 'Waiting for a secure code review. Do not merge until approved.';
-            const { data: comments } = await github.issues.listComments({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            const existingComment = comments.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes(body));
-            if (existingComment) {
-              console.log('Secure code review comment already exists.');
-            } else {
-              await github.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: body
-              });
-            }
-            await github.pulls.update({
-              pull_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'draft'
-            });
+      - run: gh pr comment $PR_URL --body "Welcome to the repository!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
