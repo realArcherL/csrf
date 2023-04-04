@@ -1,0 +1,57 @@
+name: Secure Code Review
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  check-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Secure Code Review
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = context.payload.pull_request.number
+            const owner = context.payload.repository.owner.login
+            const repo = context.payload.repository.name
+            const comment = "Waiting for secure code review. This PR cannot be merged until the review is completed."
+            const merge_block = true
+
+            const { data: reviews } = await octokit.pulls.listReviews({
+              owner,
+              repo,
+              pull_number: pr_number
+            })
+            
+            const approved = reviews.some((review) => review.state === "APPROVED")
+            const changes_requested = reviews.some((review) => review.state === "CHANGES_REQUESTED")
+            
+            if (!approved && !changes_requested) {
+              await octokit.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr_number,
+                body: comment
+              })
+
+              if (merge_block) {
+                await octokit.pulls.updateBranchProtection({
+                  owner,
+                  repo,
+                  branch: "main",
+                  required_pull_request_reviews: {
+                    required_approving_review_count: 1,
+                    dismiss_stale_reviews: true,
+                    dismissal_restrictions: {},
+                  },
+                  enforce_admins: false,
+                  restrictions: null,
+                  required_status_checks: null,
+                  allow_force_pushes: false,
+                  allow_deletions: false,
+                })
+              }
+            }
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
